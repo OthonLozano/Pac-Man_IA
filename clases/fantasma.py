@@ -7,7 +7,6 @@ from clases.agente import Agente
 from planificacion.visibility_graph import VisibilityGraph
 from planificacion.busqueda_grafo import BusquedaEnGrafo
 
-
 class Fantasma(Agente):
     def __init__(self, posx: int, posy: int, algoritmo: str, color: tuple):
         super().__init__(posx, posy)
@@ -16,10 +15,10 @@ class Fantasma(Agente):
         self.algoritmo_usado = f"Visibility Graph + {algoritmo.upper()}"
 
     def perseguir_pacman(
-            self,
-            pacman_pos: List[int],
-            visibility_graph: VisibilityGraph,
-            obstaculos: List
+        self,
+        pacman_pos: List[int],
+        visibility_graph: VisibilityGraph,
+        obstaculos: List
     ) -> bool:
         """
         Calcula la ruta para perseguir a Pac-Man

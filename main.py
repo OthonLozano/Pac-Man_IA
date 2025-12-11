@@ -1,26 +1,29 @@
 """
-Punto de entrada principal del juego Pac-Man IA
-Ejecuta la simulación y muestra resultados
+Pac-Man con IA - Modo Pygame
 """
 from clases.entorno import Entorno
-from visualizacion.dibujado_matplotlib import VisualizadorMatplotlib
-from visualizacion.estadisticas import GeneradorEstadisticas
-
+from visualizacion.juego_pygame import JuegoPygame
+from config.niveles import NIVELES
 
 def main():
-    # Crear el entorno
-    mundo = Entorno()
+    print("="*60)
+    print("🎮 PAC-MAN CON IA COMPETITIVA")
+    print("="*60)
+    print("\n🕹️  Modo: JUGADOR vs IA")
+    print("Tú controlas a Pac-Man con las flechas")
+    print("Los fantasmas usan diferentes algoritmos de IA\n")
 
-    # Crear visualizador
-    visualizador = VisualizadorMatplotlib(mundo)
+    # Crear entorno del juego
+    mundo = Entorno(nivel=0, modo_interactivo=True)
 
-    # Ejecutar simulación
-    visualizador.iniciar_simulacion()
+    print(f"✓ {len(NIVELES)} niveles disponibles")
+    print(f"✓ {len(mundo.fantasmas)} fantasmas con IA")
+    print(f"✓ {len(mundo.puntos)} puntos en el nivel 1")
+    print(f"✓ Grafo de visibilidad: {len(mundo.visibility_graph.grafo)} nodos\n")
 
-    # Mostrar estadísticas
-    stats = GeneradorEstadisticas(mundo)
-    stats.mostrar_comparacion_algoritmos()
-
+    # Crear y ejecutar juego
+    juego = JuegoPygame(mundo)
+    juego.ejecutar()
 
 if __name__ == "__main__":
     main()
