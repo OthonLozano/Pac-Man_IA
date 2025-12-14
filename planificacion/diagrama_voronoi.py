@@ -28,7 +28,7 @@ class DiagramaVoronoi:
         self.mapa_distancias: Dict[Tuple[int, int], float] = {}
         self.puntos_voronoi: Set[Tuple[int, int]] = set()
 
-        print(f"🔷 Construyendo Diagrama de Voronoi...")
+        print(f"Construyendo Diagrama de Voronoi...")
         self.construir_voronoi()
         print(f"   ✓ {len(self.grafo)} nodos en el diagrama")
         print(f"   ✓ {sum(len(vecinos) for vecinos in self.grafo.values()) // 2} conexiones")

@@ -40,8 +40,8 @@ class JuegoPygame:
         nivel_config = NIVELES[entorno.nivel_actual]
         self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
 
-        print(f"⚙️  Velocidad Pac-Man: {self.velocidad_pacman} frames")
-        print(f"⚙️  Velocidad Fantasmas: {self.velocidad_fantasma} frames")
+        print(f"Velocidad Pac-Man: {self.velocidad_pacman} frames")
+        print(f"Velocidad Fantasmas: {self.velocidad_fantasma} frames")
 
         # Estado del juego
         self.pausa = False
@@ -400,14 +400,14 @@ class JuegoPygame:
                 if event.key == pygame.K_w:
                     configuracion.MOSTRAR_VORONOI = not configuracion.MOSTRAR_VORONOI
                     estado = "ON" if configuracion.MOSTRAR_VORONOI else "OFF"
-                    print(f"🔷 Voronoi Diagram: {estado}")
+                    print(f"Voronoi Diagram: {estado}")
 
                 if event.key == pygame.K_r:
                     if self.entorno.juego_terminado:
-                        print("\n🔄 Reiniciando juego...")
+                        print("\nReiniciando juego...")
                         self.reiniciar_juego()
                     else:
-                        print("\n🔄 Reiniciando nivel actual...")
+                        print("\nReiniciando nivel actual...")
                         self.reiniciar_nivel()
 
                 if not self.pausa and not self.entorno.juego_terminado:
@@ -436,7 +436,7 @@ class JuegoPygame:
                 if not punto.recolectado and self.entorno.pacman.pos == punto.pos:
                     self.entorno.pacman.recolectar_punto(punto)
                     self.entorno.puntaje = self.entorno.pacman.puntaje
-                    print(f"🟡 Punto! Puntaje: {self.entorno.puntaje}")
+                    print(f"Punto! Puntaje: {self.entorno.puntaje}")
 
         if self.frame_count % self.velocidad_fantasma == 0:
             for fantasma in self.entorno.fantasmas:
@@ -454,18 +454,18 @@ class JuegoPygame:
         if self.entorno.pacman.verificar_colision_fantasma(self.entorno.fantasmas):
             self.entorno.juego_terminado = True
             self.entorno.victoria = False
-            print("\n💀 GAME OVER")
+            print("\nGAME OVER")
 
         puntos_restantes = [p for p in self.entorno.puntos if not p.recolectado]
         if not puntos_restantes:
-            print(f"\n🎉 ¡Nivel {self.entorno.nivel_actual + 1} completado!")
+            print(f"\n¡Nivel {self.entorno.nivel_actual + 1} completado!")
             self.entorno.nivel_actual += 1
 
             from config.niveles import NIVELES
             if self.entorno.nivel_actual >= len(NIVELES):
                 self.entorno.juego_terminado = True
                 self.entorno.victoria = True
-                print("\n🏆 ¡GANASTE TODO!")
+                print("\n¡GANASTE TODO!")
             else:
                 self.entorno._reiniciar_nivel()
                 self.frame_count = 0
@@ -508,7 +508,7 @@ class JuegoPygame:
         self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
 
         pygame.display.set_caption(f"Pac-Man IA - Nivel {self.entorno.nivel_actual + 1}")
-        print(f"✅ Nivel {self.entorno.nivel_actual + 1} reiniciado")
+        print(f"Nivel {self.entorno.nivel_actual + 1} reiniciado")
 
     def reiniciar_juego(self):
         """Reinicia el juego desde el nivel 1"""
@@ -525,13 +525,13 @@ class JuegoPygame:
         self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
 
         pygame.display.set_caption(f"Pac-Man IA - Nivel {self.entorno.nivel_actual + 1}")
-        print(f"✅ Juego reiniciado desde el Nivel 1")
+        print(f"Juego reiniciado desde el Nivel 1")
 
     def ejecutar(self):
         """Loop principal del juego"""
         print("\n" + "="*60)
-        print("🎮 CONTROLES:")
-        print("  ⬆️⬇️⬅️➡️  - Mover Pac-Man")
+        print("  CONTROLES:")
+        print("  Flechas - Mover Pac-Man")
         print("  ESPACIO - Pausar")
         print("  V - Toggle Visibility Graph")
         print("  W - Toggle Voronoi Diagram")
@@ -551,7 +551,7 @@ class JuegoPygame:
         print("\n" + "="*60)
         print("RESULTADO FINAL")
         print("="*60)
-        print(f"Estado: {'VICTORIA ✓' if self.entorno.victoria else 'DERROTA ✗'}")
+        print(f"Estado: {'VICTORIA' if self.entorno.victoria else 'DERROTA'}")
         print(f"Nivel alcanzado: {self.entorno.nivel_actual + 1}")
         print(f"Puntaje final: {self.entorno.pacman.puntaje}")
         print(f"Puntos recolectados: {self.entorno.pacman.puntos_recolectados}")

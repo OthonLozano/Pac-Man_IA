@@ -6,8 +6,6 @@ Configuración global del juego
 TAMANIO_MUNDO = 20
 LIMITE = TAMANIO_MUNDO // 2
 
-# Modo de juego
-MODO_INTERACTIVO = True
 
 # Velocidades (en frames: más alto = más lento)
 VELOCIDAD_PACMAN = 5  # Pac-Man se mueve cada 5 frames
@@ -22,19 +20,26 @@ ALTO_VENTANA = 800
 COLOR_FONDO = (0, 0, 0)  # Negro
 COLOR_PACMAN = (255, 255, 0)  # Amarillo
 
-# Colores de fantasmas según algoritmo/método
-COLOR_FANTASMA_BPA = (255, 0, 0)  # Rojo (Blinky) - BPA + Visibility
-COLOR_FANTASMA_GREEDY = (255, 184, 255)  # Rosa (Pinky) - Greedy + Visibility
-COLOR_FANTASMA_A_STAR = (0, 255, 255)  # Cyan (Inky) - A* + Visibility
-COLOR_FANTASMA_DIJKSTRA = (255, 165, 0)  # Naranja (Clyde) - A* + Voronoi
-COLOR_FANTASMA_VORONOI_GREEDY = (0, 255, 100)  # Verde - Greedy + Voronoi
+# COLORES DE FANTASMAS (4 COMBINACIONES)
+# Cada color representa una combinación única de algoritmo + método
+
+# Fantasma 1: Visibility Graph + A* (Más óptimo con VG)
+COLOR_FANTASMA_VG_ASTAR = (255, 0, 0)  # ROJO (Blinky)
+
+# Fantasma 2: Visibility Graph + BPA (Exploración sistemática con VG)
+COLOR_FANTASMA_VG_BPA = (255, 184, 255)  # ROSA (Pinky)
+
+# Fantasma 3: Voronoi + A* (Más seguro y óptimo)
+COLOR_FANTASMA_VORONOI_ASTAR = (0, 255, 255)  # CYAN (Inky)
+
+# Fantasma 4: Voronoi + BPA (Más seguro con exploración)
+COLOR_FANTASMA_VORONOI_BPA = (255, 184, 82)  # NARANJA (Clyde)
 
 COLOR_PUNTO = (255, 255, 255)  # Blanco
 COLOR_OBSTACULO = (33, 33, 222)  # Azul oscuro
 
-# ============================================
+
 # VISUALIZACIÓN DE GRAFOS DE PLANIFICACIÓN
-# ============================================
 
 # Visibility Graph (caminos óptimos)
 MOSTRAR_VISIBILITY_GRAPH = False  # Cambiar a True para visualizar
@@ -45,6 +50,3 @@ COLOR_VG_LINEA = (0, 100, 50)  # Verde oscuro
 MOSTRAR_VORONOI = False  # Cambiar a True para visualizar
 COLOR_VORONOI_NODO = (100, 100, 150)  # Gris azulado
 COLOR_VORONOI_LINEA = (60, 60, 90)  # Gris oscuro
-
-# Generación de puntos
-GENERACION_ALEATORIA = True

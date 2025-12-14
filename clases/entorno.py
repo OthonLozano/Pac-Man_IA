@@ -7,7 +7,7 @@ from clases.fantasma import Fantasma
 from clases.obstaculo import Obstaculo
 from clases.punto import Punto
 from planificacion.visibility_graph import VisibilityGraph
-from planificacion.diagrama_voronoi import DiagramaVoronoi  # ← NUEVO
+from planificacion.diagrama_voronoi import DiagramaVoronoi
 from config.configuracion import *
 from config.niveles import NIVELES
 import random
@@ -28,14 +28,14 @@ class Entorno:
 
         # AMBOS métodos de planificación
         self.visibility_graph: Optional[VisibilityGraph] = None
-        self.voronoi_diagram: Optional[DiagramaVoronoi] = None  # ← NUEVO
+        self.voronoi_diagram: Optional[DiagramaVoronoi] = None
 
         self._inicializar_nivel()
 
     def _inicializar_nivel(self):
         """Inicializa el nivel actual"""
         if self.nivel_actual >= len(NIVELES):
-            print("🎉 ¡Completaste todos los niveles!")
+            print("¡Completaste todos los niveles!")
             self.juego_terminado = True
             self.victoria = True
             return
@@ -49,66 +49,48 @@ class Entorno:
         for x, y, tam in nivel_config['obstaculos']:
             self.obstaculos.append(Obstaculo(x, y, tam))
 
-        # ========================================
-        # CREAR AMBOS GRAFOS DE PLANIFICACIÓN
-        # ========================================
-        print("📐 Construyendo métodos de planificación...")
-
         # Visibility Graph (caminos óptimos)
         self.visibility_graph = VisibilityGraph(
             self.obstaculos,
             (LIMITE, LIMITE)
         )
 
-        # Diagrama de Voronoi (caminos seguros) ← NUEVO
+        # Diagrama de Voronoi (caminos seguros)
         self.voronoi_diagram = DiagramaVoronoi(
             self.obstaculos,
             (LIMITE, LIMITE)
         )
 
-        print()
+        self.pacman = PacMan(0, 0, self.modo_interactivo) # Pac-Man en el centro
 
-        # ========================================
-        # CREAR PAC-MAN EN EL CENTRO
-        # ========================================
-        self.pacman = PacMan(0, 0, self.modo_interactivo)
 
-        # ========================================
-        # CREAR FANTASMAS CON DIFERENTES ESTRATEGIAS
-        # ========================================
-        num_fantasmas = nivel_config['num_fantasmas']
 
-        # Configuraciones: (algoritmo, método_planificación, color)
+        # Configuraciones FIJAS: (algoritmo, método_planificación, color)
         configuraciones = [
-            ('bpa', 'visibility', COLOR_FANTASMA_BPA),  # Fantasma 1: BPA + VG
-            ('greedy', 'visibility', COLOR_FANTASMA_GREEDY),  # Fantasma 2: Greedy + VG
-            ('a_star', 'visibility', COLOR_FANTASMA_A_STAR),  # Fantasma 3: A* + VG
-            ('a_star', 'voronoi', COLOR_FANTASMA_DIJKSTRA),  # Fantasma 4: A* + Voronoi
-            ('greedy', 'voronoi', (0, 255, 100))  # Fantasma 5: Greedy + Voronoi
+            ('a_star', 'visibility', COLOR_FANTASMA_VG_ASTAR),      # Fantasma 1
+            ('bpa', 'visibility', COLOR_FANTASMA_VG_BPA),           # Fantasma 2
+            ('a_star', 'voronoi', COLOR_FANTASMA_VORONOI_ASTAR),    # Fantasma 3
+            ('bpa', 'voronoi', COLOR_FANTASMA_VORONOI_BPA)          # Fantasma 4
         ]
 
-        # POSICIONES INICIALES en las esquinas
+        # Posiciones iniciales de los fantasmas en las 4 esquinas
         posiciones_iniciales = [
-            (-8, 8),  # Esquina superior izquierda
-            (8, 8),  # Esquina superior derecha
+            (-8, 8),   # Esquina superior izquierda
+            (8, 8),    # Esquina superior derecha
             (-8, -8),  # Esquina inferior izquierda
-            (8, -8),  # Esquina inferior derecha
-            (0, 8)  # Centro superior
+            (8, -8)    # Esquina inferior derecha
         ]
 
-        print("👻 Creando fantasmas:")
-        for i in range(num_fantasmas):
+        for i in range(4):
             x, y = posiciones_iniciales[i]
             algoritmo, metodo, color = configuraciones[i]
 
             fantasma = Fantasma(x, y, algoritmo, metodo, color)
             self.fantasmas.append(fantasma)
 
-            print(f"   Fantasma {i + 1}: {fantasma.algoritmo_usado}")
 
-        print()
 
-        # Generar puntos
+        # Generar puntos a recolectar de manera random
         self._generar_puntos(nivel_config['puntos'])
 
     def _generar_puntos(self, cantidad: int):
@@ -130,13 +112,13 @@ class Entorno:
                     colision = True
                     break
 
-            # Con spawn de Pac-Man
-            if abs(x) <= 1 and abs(y) <= 1:
+            # Con spawn de Pac-Man (más espacio)
+            if abs(x) <= 2 and abs(y) <= 2:
                 colision = True
 
-            # Con spawn de fantasmas
+            # Con spawn de fantasmas (más espacio)
             for fantasma in self.fantasmas:
-                if abs(x - fantasma.pos[0]) <= 2 and abs(y - fantasma.pos[1]) <= 2:
+                if abs(x - fantasma.pos[0]) <= 3 and abs(y - fantasma.pos[1]) <= 3:
                     colision = True
                     break
 
@@ -146,6 +128,9 @@ class Entorno:
 
             intentos += 1
 
+        if puntos_generados < cantidad:
+            print(f"Solo se pudieron generar {puntos_generados}/{cantidad} puntos")
+
     def actualizar(self):
         """Actualiza el juego cada frame"""
         if self.juego_terminado:
@@ -154,19 +139,19 @@ class Entorno:
         if not self.pacman.vivo:
             self.juego_terminado = True
             self.victoria = False
-            print("\n💀 GAME OVER - Pac-Man fue atrapado")
+            print("\nGAME OVER - Pac-Man fue atrapado")
             return
 
         # Verificar victoria
         puntos_restantes = [p for p in self.puntos if not p.recolectado]
         if not puntos_restantes:
-            print(f"\n🎉 ¡Nivel {self.nivel_actual + 1} completado!")
+            print(f"\n¡Nivel {self.nivel_actual + 1} completado!")
             self.nivel_actual += 1
 
             if self.nivel_actual >= len(NIVELES):
                 self.juego_terminado = True
                 self.victoria = True
-                print("\n🏆 ¡GANASTE EL JUEGO COMPLETO!")
+                print("\n¡GANASTE EL JUEGO COMPLETO!")
             else:
                 self._reiniciar_nivel()
             return
@@ -194,7 +179,7 @@ class Entorno:
                 self.pacman.recolectar_punto(punto)
                 self.puntaje = self.pacman.puntaje
 
-        # MOVER FANTASMAS (ahora con AMBOS métodos de planificación)
+        # MOVER FANTASMAS
         for fantasma in self.fantasmas:
             if not fantasma.trayectoria or len(fantasma.trayectoria) <= 1:
                 fantasma.perseguir_pacman(

@@ -2,11 +2,11 @@
 Definición de niveles del juego
 """
 
-# Nivel 1: Laberinto Simple (FÁCIL)
+# Nivel 1
 NIVEL_1 = {
     'nombre': 'Laberinto Clásico',
     'obstaculos': [
-        # ... (mantén los obstáculos como están)
+        #  Obstaculos del nivel 1
         (-9, 9, 1), (-7, 9, 1), (-5, 9, 1), (-3, 9, 1), (-1, 9, 1),
         (1, 9, 1), (3, 9, 1), (5, 9, 1), (7, 9, 1), (9, 9, 1),
         (-9, -9, 1), (-7, -9, 1), (-5, -9, 1), (-3, -9, 1), (-1, -9, 1),
@@ -22,14 +22,14 @@ NIVEL_1 = {
     ],
     'puntos': 5,
     'velocidad_fantasmas': 400,  # ← MUY LENTOS (Nivel 1)
-    'num_fantasmas': 3
+    'num_fantasmas': 4
 }
 
-# Nivel 2: Laberinto en Cruz (NORMAL)
+# Nivel 2
 NIVEL_2 = {
     'nombre': 'Laberinto en Cruz',
     'obstaculos': [
-        # ... (obstáculos del nivel 2)
+        #  Obstaculos del nivel 2
         (-9, 9, 1), (-7, 9, 1), (-5, 9, 1), (-3, 9, 1), (-1, 9, 1),
         (1, 9, 1), (3, 9, 1), (5, 9, 1), (7, 9, 1), (9, 9, 1),
         (-9, -9, 1), (-7, -9, 1), (-5, -9, 1), (-3, -9, 1), (-1, -9, 1),
@@ -44,15 +44,15 @@ NIVEL_2 = {
         (2, 6, 1), (2, 4, 1), (2, -4, 1), (2, -6, 1),
     ],
     'puntos': 1,
-    'velocidad_fantasmas': 100,  # ← NORMALES (Nivel 2)
+    'velocidad_fantasmas': 100, # Nivel 2
     'num_fantasmas': 4
 }
 
-# Nivel 3: Laberinto Complejo (DIFÍCIL)
+# Nivel 3
 NIVEL_3 = {
     'nombre': 'Laberinto del Caos',
     'obstaculos': [
-        # ... (obstáculos del nivel 3)
+        # Obstaculos del nivel 3
         (-9, 9, 1), (-7, 9, 1), (-5, 9, 1), (-3, 9, 1), (-1, 9, 1),
         (1, 9, 1), (3, 9, 1), (5, 9, 1), (7, 9, 1), (9, 9, 1),
         (-9, -9, 1), (-7, -9, 1), (-5, -9, 1), (-3, -9, 1), (-1, -9, 1),
@@ -61,16 +61,14 @@ NIVEL_3 = {
         (-9, 1, 1), (-9, 3, 1), (-9, 5, 1), (-9, 7, 1),
         (9, -7, 1), (9, -5, 1), (9, -3, 1), (9, -1, 1),
         (9, 1, 1), (9, 3, 1), (9, 5, 1), (9, 7, 1),
-        (-7, 6, 2), (-3, 6, 2), (3, 6, 2), (7, 6, 2),
-        (-7, -6, 2), (-3, -6, 2), (3, -6, 2), (7, -6, 2),
-        (-5, 3, 2), (5, 3, 2),
-        (-5, -3, 2), (5, -3, 2),
-        (0, 0, 3),
-        (-7, 0, 1), (7, 0, 1),
+        (-6, 2, 1), (-4, 2, 1), (-2, 2, 1), (2, 2, 1), (4, 2, 1), (6, 2, 1),
+        (-6, -2, 1), (-4, -2, 1), (-2, -2, 1), (2, -2, 1), (4, -2, 1), (6, -2, 1),
+        (-2, 6, 1), (-2, 4, 1), (-2, -4, 1), (-2, -6, 1),
+        (2, 6, 1), (2, 4, 1), (2, -4, 1), (2, -6, 1),
     ],
     'puntos': 1,
-    'velocidad_fantasmas': 100,  # ← RÁPIDOS (Nivel 3)
-    'num_fantasmas': 5
+    'velocidad_fantasmas': 100,  # Nivel 3
+    'num_fantasmas': 4
 }
 
 # Lista de todos los niveles

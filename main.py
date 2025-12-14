@@ -7,9 +7,9 @@ from config.niveles import NIVELES
 
 def main():
     print("="*60)
-    print("🎮 PAC-MAN CON IA COMPETITIVA")
+    print("PAC-MAN CON IA COMPETITIVA")
     print("="*60)
-    print("\n🕹️  Modo: JUGADOR vs IA")
+    print("\nModo: JUGADOR vs IA")
     print("Tú controlas a Pac-Man con las flechas")
     print("Los fantasmas usan diferentes algoritmos de IA\n")
 
