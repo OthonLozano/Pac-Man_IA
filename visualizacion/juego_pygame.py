@@ -7,7 +7,6 @@ from typing import List, Tuple
 from clases.entorno import Entorno
 from config.configuracion import *
 
-
 class JuegoPygame:
     def __init__(self, entorno: Entorno):
         pygame.init()
@@ -34,15 +33,18 @@ class JuegoPygame:
         # Contador de frames para controlar velocidad
         self.frame_count = 0
         self.velocidad_pacman = VELOCIDAD_PACMAN
-        self.velocidad_fantasma = 2  # Más lento que antes
+
+        # Velocidad de fantasmas según el nivel
+        from config.niveles import NIVELES
+        nivel_config = NIVELES[entorno.nivel_actual]
+        self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
+
+        print(f"⚙️  Velocidad Pac-Man: {self.velocidad_pacman} frames")
+        print(f"⚙️  Velocidad Fantasmas: {self.velocidad_fantasma} frames")
 
         # Estado del juego
         self.pausa = False
         self.mostrar_ayuda = True
-
-        #Tiempo de gracia al inicio
-        self.tiempo_gracia = 180  # 3 segundos a 60 FPS
-        self.en_gracia = True
 
     def mundo_a_pantalla(self, x: int, y: int) -> Tuple[int, int]:
         """Convierte coordenadas del mundo a coordenadas de pantalla"""
@@ -58,7 +60,7 @@ class JuegoPygame:
                 pygame.draw.rect(
                     self.screen,
                     (20, 20, 20),
-                    (pos_x - self.cell_size // 2, pos_y - self.cell_size // 2,
+                    (pos_x - self.cell_size//2, pos_y - self.cell_size//2,
                      self.cell_size, self.cell_size),
                     1
                 )
@@ -71,7 +73,6 @@ class JuegoPygame:
 
             pos_x, pos_y = self.mundo_a_pantalla(x, y)
 
-            # Dibujar cuadrado con borde brillante (estilo Pac-Man)
             rect = pygame.Rect(
                 pos_x - (tam * self.cell_size) // 2,
                 pos_y - (tam * self.cell_size) // 2,
@@ -79,9 +80,7 @@ class JuegoPygame:
                 tam * self.cell_size
             )
 
-            # Relleno
             pygame.draw.rect(self.screen, COLOR_OBSTACULO, rect)
-            # Borde brillante
             pygame.draw.rect(self.screen, (100, 100, 255), rect, 3)
 
     def dibujar_puntos(self):
@@ -91,7 +90,6 @@ class JuegoPygame:
                 x, y = punto.pos
                 pos_x, pos_y = self.mundo_a_pantalla(x, y)
 
-                # Punto pequeño blanco
                 pygame.draw.circle(
                     self.screen,
                     COLOR_PUNTO,
@@ -107,7 +105,6 @@ class JuegoPygame:
         x, y = self.entorno.pacman.pos
         pos_x, pos_y = self.mundo_a_pantalla(x, y)
 
-        # Círculo amarillo más grande
         radio = int(self.cell_size * 0.4)
         pygame.draw.circle(
             self.screen,
@@ -116,14 +113,11 @@ class JuegoPygame:
             radio
         )
 
-        # "Boca" de Pac-Man (triángulo negro)
         direccion = self.entorno.pacman.direccion_actual
         if direccion != [0, 0]:
-            # Calcular ángulo de la boca
             import math
             angulo = math.atan2(direccion[1], direccion[0])
 
-            # Dibujar sector circular (boca abierta)
             puntos = [
                 (pos_x, pos_y),
                 (pos_x + radio * math.cos(angulo + 0.5),
@@ -139,10 +133,8 @@ class JuegoPygame:
             x, y = fantasma.pos
             pos_x, pos_y = self.mundo_a_pantalla(x, y)
 
-            # Cuerpo del fantasma (cuadrado redondeado)
             radio = int(self.cell_size * 0.35)
 
-            # Cuerpo principal
             pygame.draw.circle(
                 self.screen,
                 fantasma.color,
@@ -150,39 +142,36 @@ class JuegoPygame:
                 radio
             )
 
-            # Ojos blancos
             ojo_radio = radio // 4
             pygame.draw.circle(
                 self.screen,
                 (255, 255, 255),
-                (pos_x - radio // 3, pos_y - radio // 4),
+                (pos_x - radio//3, pos_y - radio//4),
                 ojo_radio
             )
             pygame.draw.circle(
                 self.screen,
                 (255, 255, 255),
-                (pos_x + radio // 3, pos_y - radio // 4),
+                (pos_x + radio//3, pos_y - radio//4),
                 ojo_radio
             )
 
-            # Pupilas negras
             pupila_radio = ojo_radio // 2
             pygame.draw.circle(
                 self.screen,
                 (0, 0, 0),
-                (pos_x - radio // 3, pos_y - radio // 4),
+                (pos_x - radio//3, pos_y - radio//4),
                 pupila_radio
             )
             pygame.draw.circle(
                 self.screen,
                 (0, 0, 0),
-                (pos_x + radio // 3, pos_y - radio // 4),
+                (pos_x + radio//3, pos_y - radio//4),
                 pupila_radio
             )
 
     def dibujar_hud(self):
         """Dibuja la información en pantalla"""
-        # Nivel
         texto_nivel = self.font_normal.render(
             f"NIVEL {self.entorno.nivel_actual + 1}",
             True,
@@ -190,7 +179,6 @@ class JuegoPygame:
         )
         self.screen.blit(texto_nivel, (20, 20))
 
-        # Puntaje
         texto_puntaje = self.font_normal.render(
             f"PUNTOS: {self.entorno.pacman.puntaje}",
             True,
@@ -198,7 +186,6 @@ class JuegoPygame:
         )
         self.screen.blit(texto_puntaje, (20, 60))
 
-        # Puntos restantes
         puntos_restantes = sum(1 for p in self.entorno.puntos if not p.recolectado)
         texto_restantes = self.font_pequeña.render(
             f"Restantes: {puntos_restantes}/{len(self.entorno.puntos)}",
@@ -207,11 +194,11 @@ class JuegoPygame:
         )
         self.screen.blit(texto_restantes, (20, 100))
 
-        # Ayuda (solo al inicio)
-        if self.mostrar_ayuda and self.frame_count < 300:  # 5 segundos
+        if self.mostrar_ayuda and self.frame_count < 300:
             ayuda_textos = [
                 "Usa las FLECHAS para mover",
                 "ESPACIO para pausar",
+                "R para REINICIAR nivel",
                 "ESC para salir"
             ]
 
@@ -219,23 +206,20 @@ class JuegoPygame:
                 superficie = self.font_pequeña.render(texto, True, (100, 255, 100))
                 self.screen.blit(
                     superficie,
-                    (self.ancho - 300, 20 + i * 30)
+                    (self.ancho - 320, 20 + i * 30)
                 )
 
     def dibujar_pausa(self):
         """Dibuja la pantalla de pausa"""
-        # Fondo semi-transparente
         overlay = pygame.Surface((self.ancho, self.alto))
         overlay.set_alpha(200)
         overlay.fill((0, 0, 0))
         self.screen.blit(overlay, (0, 0))
 
-        # Texto "PAUSA"
         texto = self.font_grande.render("PAUSA", True, (255, 255, 0))
         rect = texto.get_rect(center=(self.ancho // 2, self.alto // 2))
         self.screen.blit(texto, rect)
 
-        # Instrucción
         texto_continuar = self.font_pequeña.render(
             "Presiona ESPACIO para continuar",
             True,
@@ -260,11 +244,11 @@ class JuegoPygame:
             texto = self.font_grande.render("GAME OVER", True, (255, 0, 0))
             mensaje = "Pac-Man fue atrapado"
 
-        rect = texto.get_rect(center=(self.ancho // 2, self.alto // 2 - 40))
+        rect = texto.get_rect(center=(self.ancho // 2, self.alto // 2 - 80))
         self.screen.blit(texto, rect)
 
         texto_mensaje = self.font_normal.render(mensaje, True, (255, 255, 255))
-        rect_mensaje = texto_mensaje.get_rect(center=(self.ancho // 2, self.alto // 2 + 20))
+        rect_mensaje = texto_mensaje.get_rect(center=(self.ancho // 2, self.alto // 2 - 20))
         self.screen.blit(texto_mensaje, rect_mensaje)
 
         texto_puntaje = self.font_normal.render(
@@ -272,16 +256,63 @@ class JuegoPygame:
             True,
             (255, 255, 0)
         )
-        rect_puntaje = texto_puntaje.get_rect(center=(self.ancho // 2, self.alto // 2 + 70))
+        rect_puntaje = texto_puntaje.get_rect(center=(self.ancho // 2, self.alto // 2 + 30))
         self.screen.blit(texto_puntaje, rect_puntaje)
+
+        texto_reiniciar = self.font_normal.render(
+            "Presiona R para REINICIAR",
+            True,
+            (100, 255, 100)
+        )
+        rect_reiniciar = texto_reiniciar.get_rect(center=(self.ancho // 2, self.alto // 2 + 80))
+        self.screen.blit(texto_reiniciar, rect_reiniciar)
 
         texto_salir = self.font_pequeña.render(
             "Presiona ESC para salir",
             True,
             (200, 200, 200)
         )
-        rect_salir = texto_salir.get_rect(center=(self.ancho // 2, self.alto // 2 + 120))
+        rect_salir = texto_salir.get_rect(center=(self.ancho // 2, self.alto // 2 + 130))
         self.screen.blit(texto_salir, rect_salir)
+
+    def dibujar_voronoi(self):
+        """
+        Dibuja el diagrama de Voronoi (OPCIONAL - para debugging/presentación)
+        """
+        if not hasattr(self.entorno, 'voronoi_diagram') or not MOSTRAR_VORONOI:
+            return
+
+        voronoi = self.entorno.voronoi_diagram
+
+        # Dibujar nodos del diagrama
+        for nodo in voronoi.puntos_voronoi:
+            pos_x, pos_y = self.mundo_a_pantalla(nodo[0], nodo[1])
+            pygame.draw.circle(
+                self.screen,
+                COLOR_VORONOI_NODO,
+                (pos_x, pos_y),
+                2
+            )
+
+        # Dibujar conexiones
+        dibujadas = set()
+        for nodo, vecinos in voronoi.grafo.items():
+            for vecino in vecinos:
+                # Evitar dibujar la misma línea dos veces
+                if (vecino, nodo) in dibujadas:
+                    continue
+                dibujadas.add((nodo, vecino))
+
+                pos1 = self.mundo_a_pantalla(nodo[0], nodo[1])
+                pos2 = self.mundo_a_pantalla(vecino[0], vecino[1])
+
+                pygame.draw.line(
+                    self.screen,
+                    COLOR_VORONOI_LINEA,
+                    pos1,
+                    pos2,
+                    1
+                )
 
     def manejar_eventos(self):
         """Maneja los eventos del teclado"""
@@ -295,6 +326,14 @@ class JuegoPygame:
 
                 if event.key == pygame.K_SPACE:
                     self.pausa = not self.pausa
+
+                if event.key == pygame.K_r:
+                    if self.entorno.juego_terminado:
+                        print("\n🔄 Reiniciando juego...")
+                        self.reiniciar_juego()
+                    else:
+                        print("\n🔄 Reiniciando nivel actual...")
+                        self.reiniciar_nivel()
 
                 if not self.pausa and not self.entorno.juego_terminado:
                     if event.key == pygame.K_UP:
@@ -315,68 +354,53 @@ class JuegoPygame:
 
         self.frame_count += 1
 
-        # Verificar tiempo de gracia
-        if self.en_gracia:
-            if self.frame_count >= self.tiempo_gracia:
-                self.en_gracia = False
-                print("⚠️  ¡Los fantasmas se activan!")
-
-        # Actualizar Pac-Man cada X frames
         if self.frame_count % self.velocidad_pacman == 0:
             self.entorno.pacman.actualizar_movimiento_interactivo(self.entorno.obstaculos)
 
-            # Verificar recolección de puntos
             for punto in self.entorno.puntos:
                 if not punto.recolectado and self.entorno.pacman.pos == punto.pos:
                     self.entorno.pacman.recolectar_punto(punto)
                     self.entorno.puntaje = self.entorno.pacman.puntaje
                     print(f"🟡 Punto! Puntaje: {self.entorno.puntaje}")
 
-        # ========================================
-        # FANTASMAS SOLO SE ACTIVAN DESPUÉS DEL TIEMPO DE GRACIA
-        # ========================================
-        if not self.en_gracia:
-            # Actualizar fantasmas cada X frames (más lento)
-            if self.frame_count % self.velocidad_fantasma == 0:
-                for fantasma in self.entorno.fantasmas:
-                    if not fantasma.trayectoria or len(fantasma.trayectoria) <= 1:
-                        fantasma.perseguir_pacman(
-                            self.entorno.pacman.pos,
-                            self.entorno.visibility_graph,
-                            self.entorno.obstaculos
-                        )
+        if self.frame_count % self.velocidad_fantasma == 0:
+            for fantasma in self.entorno.fantasmas:
+                if not fantasma.trayectoria or len(fantasma.trayectoria) <= 1:
+                    fantasma.perseguir_pacman(
+                        self.entorno.pacman.pos,
+                        self.entorno.visibility_graph,
+                        self.entorno.obstaculos
+                    )
 
-                    if fantasma.trayectoria and len(fantasma.trayectoria) > 1:
-                        fantasma.mover_siguiente()
+                if fantasma.trayectoria and len(fantasma.trayectoria) > 1:
+                    fantasma.mover_siguiente()
 
-        # Verificar colisiones (solo después del tiempo de gracia)
-        if not self.en_gracia:
-            if self.entorno.pacman.verificar_colision_fantasma(self.entorno.fantasmas):
-                self.entorno.juego_terminado = True
-                self.entorno.victoria = False
-                print("\n💀 GAME OVER")
+        if self.entorno.pacman.verificar_colision_fantasma(self.entorno.fantasmas):
+            self.entorno.juego_terminado = True
+            self.entorno.victoria = False
+            print("\n💀 GAME OVER")
 
-        # Verificar victoria
         puntos_restantes = [p for p in self.entorno.puntos if not p.recolectado]
         if not puntos_restantes:
             print(f"\n🎉 ¡Nivel {self.entorno.nivel_actual + 1} completado!")
             self.entorno.nivel_actual += 1
 
-            if self.entorno.nivel_actual >= len(self.entorno.visibility_graph.obstaculos):
+            from config.niveles import NIVELES
+            if self.entorno.nivel_actual >= len(NIVELES):
                 self.entorno.juego_terminado = True
                 self.entorno.victoria = True
                 print("\n🏆 ¡GANASTE TODO!")
             else:
                 self.entorno._reiniciar_nivel()
-                self.en_gracia = True  # Reiniciar tiempo de gracia
                 self.frame_count = 0
+                nivel_config = NIVELES[self.entorno.nivel_actual]
+                self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
                 pygame.display.set_caption(f"Pac-Man IA - Nivel {self.entorno.nivel_actual + 1}")
 
     def dibujar(self):
         """Dibuja todos los elementos"""
         self.screen.fill(COLOR_FONDO)
-
-        # self.dibujar_grid()  # Descomentar si quieres ver la cuadrícula
+        self.dibujar_voronoi()
         self.dibujar_obstaculos()
         self.dibujar_puntos()
         self.dibujar_fantasmas()
@@ -391,14 +415,46 @@ class JuegoPygame:
 
         pygame.display.flip()
 
+    def reiniciar_nivel(self):
+        """Reinicia el nivel actual"""
+        self.frame_count = 0
+        self.pausa = False
+
+        self.entorno._reiniciar_nivel()
+
+        from config.niveles import NIVELES
+        nivel_config = NIVELES[self.entorno.nivel_actual]
+        self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
+
+        pygame.display.set_caption(f"Pac-Man IA - Nivel {self.entorno.nivel_actual + 1}")
+        print(f"✅ Nivel {self.entorno.nivel_actual + 1} reiniciado")
+
+    def reiniciar_juego(self):
+        """Reinicia el juego desde el nivel 1"""
+        self.frame_count = 0
+        self.pausa = False
+
+        self.entorno.nivel_actual = 0
+        self.entorno.juego_terminado = False
+        self.entorno.victoria = False
+        self.entorno._reiniciar_nivel()
+
+        from config.niveles import NIVELES
+        nivel_config = NIVELES[self.entorno.nivel_actual]
+        self.velocidad_fantasma = nivel_config['velocidad_fantasmas']
+
+        pygame.display.set_caption(f"Pac-Man IA - Nivel {self.entorno.nivel_actual + 1}")
+        print(f"✅ Juego reiniciado desde el Nivel 1")
+
     def ejecutar(self):
         """Loop principal del juego"""
-        print("\n" + "=" * 60)
+        print("\n" + "="*60)
         print("🎮 CONTROLES:")
         print("  ⬆️⬇️⬅️➡️  - Mover Pac-Man")
         print("  ESPACIO - Pausar")
+        print("  R - Reiniciar nivel/juego")
         print("  ESC - Salir")
-        print("=" * 60 + "\n")
+        print("="*60 + "\n")
 
         ejecutando = True
         while ejecutando:
@@ -409,12 +465,11 @@ class JuegoPygame:
 
         pygame.quit()
 
-        # Mostrar resultado final
-        print("\n" + "=" * 60)
+        print("\n" + "="*60)
         print("RESULTADO FINAL")
-        print("=" * 60)
+        print("="*60)
         print(f"Estado: {'VICTORIA ✓' if self.entorno.victoria else 'DERROTA ✗'}")
         print(f"Nivel alcanzado: {self.entorno.nivel_actual + 1}")
         print(f"Puntaje final: {self.entorno.pacman.puntaje}")
         print(f"Puntos recolectados: {self.entorno.pacman.puntos_recolectados}")
-        print("=" * 60 + "\n")
+        print("="*60 + "\n")

@@ -1,42 +1,35 @@
 """
 Definición de niveles del juego
-Cada nivel representa un "mapa topológico" diferente
 """
 
-# Nivel 1: Laberinto Simple
+# Nivel 1: Laberinto Simple (FÁCIL)
 NIVEL_1 = {
     'nombre': 'Laberinto Clásico',
     'obstaculos': [
-        # Bordes superiores
+        # ... (mantén los obstáculos como están)
         (-9, 9, 1), (-7, 9, 1), (-5, 9, 1), (-3, 9, 1), (-1, 9, 1),
         (1, 9, 1), (3, 9, 1), (5, 9, 1), (7, 9, 1), (9, 9, 1),
-
-        # Bordes inferiores
         (-9, -9, 1), (-7, -9, 1), (-5, -9, 1), (-3, -9, 1), (-1, -9, 1),
         (1, -9, 1), (3, -9, 1), (5, -9, 1), (7, -9, 1), (9, -9, 1),
-
-        # Bordes laterales
         (-9, -7, 1), (-9, -5, 1), (-9, -3, 1), (-9, -1, 1),
         (-9, 1, 1), (-9, 3, 1), (-9, 5, 1), (-9, 7, 1),
         (9, -7, 1), (9, -5, 1), (9, -3, 1), (9, -1, 1),
         (9, 1, 1), (9, 3, 1), (9, 5, 1), (9, 7, 1),
-
-        # Obstáculos internos (estilo Pac-Man)
         (-6, 6, 2), (6, 6, 2),
         (-6, -6, 2), (6, -6, 2),
         (0, 4, 2), (0, -4, 2),
         (-3, 0, 2), (3, 0, 2),
     ],
-    'puntos': 40,
-    'velocidad_fantasmas': 3,
+    'puntos': 5,
+    'velocidad_fantasmas': 400,  # ← MUY LENTOS (Nivel 1)
     'num_fantasmas': 3
 }
 
-# Nivel 2: Laberinto en Cruz
+# Nivel 2: Laberinto en Cruz (NORMAL)
 NIVEL_2 = {
     'nombre': 'Laberinto en Cruz',
     'obstaculos': [
-        # Bordes
+        # ... (obstáculos del nivel 2)
         (-9, 9, 1), (-7, 9, 1), (-5, 9, 1), (-3, 9, 1), (-1, 9, 1),
         (1, 9, 1), (3, 9, 1), (5, 9, 1), (7, 9, 1), (9, 9, 1),
         (-9, -9, 1), (-7, -9, 1), (-5, -9, 1), (-3, -9, 1), (-1, -9, 1),
@@ -45,23 +38,21 @@ NIVEL_2 = {
         (-9, 1, 1), (-9, 3, 1), (-9, 5, 1), (-9, 7, 1),
         (9, -7, 1), (9, -5, 1), (9, -3, 1), (9, -1, 1),
         (9, 1, 1), (9, 3, 1), (9, 5, 1), (9, 7, 1),
-
-        # Cruz central
         (-6, 2, 1), (-4, 2, 1), (-2, 2, 1), (2, 2, 1), (4, 2, 1), (6, 2, 1),
         (-6, -2, 1), (-4, -2, 1), (-2, -2, 1), (2, -2, 1), (4, -2, 1), (6, -2, 1),
         (-2, 6, 1), (-2, 4, 1), (-2, -4, 1), (-2, -6, 1),
         (2, 6, 1), (2, 4, 1), (2, -4, 1), (2, -6, 1),
     ],
-    'puntos': 50,
-    'velocidad_fantasmas': 2,
+    'puntos': 1,
+    'velocidad_fantasmas': 100,  # ← NORMALES (Nivel 2)
     'num_fantasmas': 4
 }
 
-# Nivel 3: Laberinto Complejo
+# Nivel 3: Laberinto Complejo (DIFÍCIL)
 NIVEL_3 = {
     'nombre': 'Laberinto del Caos',
     'obstaculos': [
-        # Bordes
+        # ... (obstáculos del nivel 3)
         (-9, 9, 1), (-7, 9, 1), (-5, 9, 1), (-3, 9, 1), (-1, 9, 1),
         (1, 9, 1), (3, 9, 1), (5, 9, 1), (7, 9, 1), (9, 9, 1),
         (-9, -9, 1), (-7, -9, 1), (-5, -9, 1), (-3, -9, 1), (-1, -9, 1),
@@ -70,8 +61,6 @@ NIVEL_3 = {
         (-9, 1, 1), (-9, 3, 1), (-9, 5, 1), (-9, 7, 1),
         (9, -7, 1), (9, -5, 1), (9, -3, 1), (9, -1, 1),
         (9, 1, 1), (9, 3, 1), (9, 5, 1), (9, 7, 1),
-
-        # Laberinto interno complejo
         (-7, 6, 2), (-3, 6, 2), (3, 6, 2), (7, 6, 2),
         (-7, -6, 2), (-3, -6, 2), (3, -6, 2), (7, -6, 2),
         (-5, 3, 2), (5, 3, 2),
@@ -79,8 +68,8 @@ NIVEL_3 = {
         (0, 0, 3),
         (-7, 0, 1), (7, 0, 1),
     ],
-    'puntos': 60,
-    'velocidad_fantasmas': 1,
+    'puntos': 1,
+    'velocidad_fantasmas': 100,  # ← RÁPIDOS (Nivel 3)
     'num_fantasmas': 5
 }
 

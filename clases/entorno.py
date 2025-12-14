@@ -7,6 +7,7 @@ from clases.fantasma import Fantasma
 from clases.obstaculo import Obstaculo
 from clases.punto import Punto
 from planificacion.visibility_graph import VisibilityGraph
+from planificacion.diagrama_voronoi import DiagramaVoronoi  # ← NUEVO
 from config.configuracion import *
 from config.niveles import NIVELES
 import random
@@ -24,7 +25,10 @@ class Entorno:
         self.puntaje = 0
         self.juego_terminado = False
         self.victoria = False
+
+        # AMBOS métodos de planificación
         self.visibility_graph: Optional[VisibilityGraph] = None
+        self.voronoi_diagram: Optional[DiagramaVoronoi] = None  # ← NUEVO
 
         self._inicializar_nivel()
 
@@ -45,11 +49,24 @@ class Entorno:
         for x, y, tam in nivel_config['obstaculos']:
             self.obstaculos.append(Obstaculo(x, y, tam))
 
-        # Crear Visibility Graph
+        # ========================================
+        # CREAR AMBOS GRAFOS DE PLANIFICACIÓN
+        # ========================================
+        print("📐 Construyendo métodos de planificación...")
+
+        # Visibility Graph (caminos óptimos)
         self.visibility_graph = VisibilityGraph(
             self.obstaculos,
             (LIMITE, LIMITE)
         )
+
+        # Diagrama de Voronoi (caminos seguros) ← NUEVO
+        self.voronoi_diagram = DiagramaVoronoi(
+            self.obstaculos,
+            (LIMITE, LIMITE)
+        )
+
+        print()
 
         # ========================================
         # CREAR PAC-MAN EN EL CENTRO
@@ -57,19 +74,20 @@ class Entorno:
         self.pacman = PacMan(0, 0, self.modo_interactivo)
 
         # ========================================
-        # CREAR FANTASMAS EN ESQUINAS LEJANAS
+        # CREAR FANTASMAS CON DIFERENTES ESTRATEGIAS
         # ========================================
         num_fantasmas = nivel_config['num_fantasmas']
-        algoritmos = ['bpa', 'greedy', 'a_star', 'bpa', 'greedy']
-        colores = [
-            COLOR_FANTASMA_BPA,
-            COLOR_FANTASMA_GREEDY,
-            COLOR_FANTASMA_A_STAR,
-            COLOR_FANTASMA_DIJKSTRA,
-            COLOR_FANTASMA_BPA
+
+        # Configuraciones: (algoritmo, método_planificación, color)
+        configuraciones = [
+            ('bpa', 'visibility', COLOR_FANTASMA_BPA),  # Fantasma 1: BPA + VG
+            ('greedy', 'visibility', COLOR_FANTASMA_GREEDY),  # Fantasma 2: Greedy + VG
+            ('a_star', 'visibility', COLOR_FANTASMA_A_STAR),  # Fantasma 3: A* + VG
+            ('a_star', 'voronoi', COLOR_FANTASMA_DIJKSTRA),  # Fantasma 4: A* + Voronoi
+            ('greedy', 'voronoi', (0, 255, 100))  # Fantasma 5: Greedy + Voronoi
         ]
 
-        # POSICIONES SEPARADAS EN LAS ESQUINAS DEL MAPA
+        # POSICIONES INICIALES en las esquinas
         posiciones_iniciales = [
             (-8, 8),  # Esquina superior izquierda
             (8, 8),  # Esquina superior derecha
@@ -78,11 +96,17 @@ class Entorno:
             (0, 8)  # Centro superior
         ]
 
+        print("👻 Creando fantasmas:")
         for i in range(num_fantasmas):
             x, y = posiciones_iniciales[i]
-            self.fantasmas.append(
-                Fantasma(x, y, algoritmos[i], colores[i])
-            )
+            algoritmo, metodo, color = configuraciones[i]
+
+            fantasma = Fantasma(x, y, algoritmo, metodo, color)
+            self.fantasmas.append(fantasma)
+
+            print(f"   Fantasma {i + 1}: {fantasma.algoritmo_usado}")
+
+        print()
 
         # Generar puntos
         self._generar_puntos(nivel_config['puntos'])
@@ -170,12 +194,13 @@ class Entorno:
                 self.pacman.recolectar_punto(punto)
                 self.puntaje = self.pacman.puntaje
 
-        # MOVER FANTASMAS
+        # MOVER FANTASMAS (ahora con AMBOS métodos de planificación)
         for fantasma in self.fantasmas:
             if not fantasma.trayectoria or len(fantasma.trayectoria) <= 1:
                 fantasma.perseguir_pacman(
                     self.pacman.pos,
                     self.visibility_graph,
+                    self.voronoi_diagram,
                     self.obstaculos
                 )
 
@@ -202,4 +227,5 @@ class Entorno:
         self.juego_terminado = False
         self.victoria = False
         self.visibility_graph = None
+        self.voronoi_diagram = None
         self._inicializar_nivel()
