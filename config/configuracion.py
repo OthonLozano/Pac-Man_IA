@@ -32,10 +32,19 @@ COLOR_FANTASMA_VORONOI_GREEDY = (0, 255, 100)  # Verde - Greedy + Voronoi
 COLOR_PUNTO = (255, 255, 255)  # Blanco
 COLOR_OBSTACULO = (33, 33, 222)  # Azul oscuro
 
-# Visualización del diagrama de Voronoi (opcional)
+# ============================================
+# VISUALIZACIÓN DE GRAFOS DE PLANIFICACIÓN
+# ============================================
+
+# Visibility Graph (caminos óptimos)
+MOSTRAR_VISIBILITY_GRAPH = False  # Cambiar a True para visualizar
+COLOR_VG_NODO = (0, 200, 100)  # Verde claro
+COLOR_VG_LINEA = (0, 100, 50)  # Verde oscuro
+
+# Diagrama de Voronoi (caminos seguros)
+MOSTRAR_VORONOI = False  # Cambiar a True para visualizar
 COLOR_VORONOI_NODO = (100, 100, 150)  # Gris azulado
 COLOR_VORONOI_LINEA = (60, 60, 90)  # Gris oscuro
-MOSTRAR_VORONOI = False  # Cambiar a True para ver el diagrama
 
 # Generación de puntos
 GENERACION_ALEATORIA = True

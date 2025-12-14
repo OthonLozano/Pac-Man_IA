@@ -1,27 +1,28 @@
 """
 Visualización del juego con Pygame (modo interactivo)
+Incluye visualización de Visibility Graph y Diagrama de Voronoi
 """
 import pygame
 import sys
 from typing import List, Tuple
 from clases.entorno import Entorno
-from config.configuracion import *
+from config import configuracion
 
 class JuegoPygame:
     def __init__(self, entorno: Entorno):
         pygame.init()
 
         self.entorno = entorno
-        self.ancho = ANCHO_VENTANA
-        self.alto = ALTO_VENTANA
+        self.ancho = configuracion.ANCHO_VENTANA
+        self.alto = configuracion.ALTO_VENTANA
         self.screen = pygame.display.set_mode((self.ancho, self.alto))
         pygame.display.set_caption(f"Pac-Man IA - Nivel {entorno.nivel_actual + 1}")
 
         self.clock = pygame.time.Clock()
-        self.fps = FPS
+        self.fps = configuracion.FPS
 
         # Calcular tamaño de celda
-        self.cell_size = self.ancho // (TAMANIO_MUNDO + 2)
+        self.cell_size = self.ancho // (configuracion.TAMANIO_MUNDO + 2)
         self.offset_x = self.ancho // 2
         self.offset_y = self.alto // 2
 
@@ -32,7 +33,7 @@ class JuegoPygame:
 
         # Contador de frames para controlar velocidad
         self.frame_count = 0
-        self.velocidad_pacman = VELOCIDAD_PACMAN
+        self.velocidad_pacman = configuracion.VELOCIDAD_PACMAN
 
         # Velocidad de fantasmas según el nivel
         from config.niveles import NIVELES
@@ -54,8 +55,8 @@ class JuegoPygame:
 
     def dibujar_grid(self):
         """Dibuja la cuadrícula de fondo"""
-        for x in range(-LIMITE, LIMITE + 1):
-            for y in range(-LIMITE, LIMITE + 1):
+        for x in range(-configuracion.LIMITE, configuracion.LIMITE + 1):
+            for y in range(-configuracion.LIMITE, configuracion.LIMITE + 1):
                 pos_x, pos_y = self.mundo_a_pantalla(x, y)
                 pygame.draw.rect(
                     self.screen,
@@ -64,6 +65,86 @@ class JuegoPygame:
                      self.cell_size, self.cell_size),
                     1
                 )
+
+    def dibujar_visibility_graph(self):
+        """
+        Dibuja el Visibility Graph (caminos óptimos)
+        """
+        # ← LEER DIRECTAMENTE DEL MÓDULO
+        if not hasattr(self.entorno, 'visibility_graph') or not configuracion.MOSTRAR_VISIBILITY_GRAPH:
+            return
+
+        vg = self.entorno.visibility_graph
+
+        # Dibujar conexiones primero (para que queden debajo de los nodos)
+        dibujadas = set()
+        for nodo, vecinos in vg.grafo.items():
+            for vecino in vecinos:
+                # Evitar dibujar la misma línea dos veces
+                if (vecino, nodo) in dibujadas:
+                    continue
+                dibujadas.add((nodo, vecino))
+
+                pos1 = self.mundo_a_pantalla(nodo[0], nodo[1])
+                pos2 = self.mundo_a_pantalla(vecino[0], vecino[1])
+
+                pygame.draw.line(
+                    self.screen,
+                    configuracion.COLOR_VG_LINEA,
+                    pos1,
+                    pos2,
+                    1
+                )
+
+        # Dibujar nodos del grafo
+        for nodo in vg.grafo.keys():
+            pos_x, pos_y = self.mundo_a_pantalla(nodo[0], nodo[1])
+            pygame.draw.circle(
+                self.screen,
+                configuracion.COLOR_VG_NODO,
+                (pos_x, pos_y),
+                3
+            )
+
+    def dibujar_voronoi(self):
+        """
+        Dibuja el diagrama de Voronoi (caminos seguros)
+        """
+        # ← LEER DIRECTAMENTE DEL MÓDULO
+        if not hasattr(self.entorno, 'voronoi_diagram') or not configuracion.MOSTRAR_VORONOI:
+            return
+
+        voronoi = self.entorno.voronoi_diagram
+
+        # Dibujar conexiones primero
+        dibujadas = set()
+        for nodo, vecinos in voronoi.grafo.items():
+            for vecino in vecinos:
+                # Evitar dibujar la misma línea dos veces
+                if (vecino, nodo) in dibujadas:
+                    continue
+                dibujadas.add((nodo, vecino))
+
+                pos1 = self.mundo_a_pantalla(nodo[0], nodo[1])
+                pos2 = self.mundo_a_pantalla(vecino[0], vecino[1])
+
+                pygame.draw.line(
+                    self.screen,
+                    configuracion.COLOR_VORONOI_LINEA,
+                    pos1,
+                    pos2,
+                    1
+                )
+
+        # Dibujar nodos del diagrama
+        for nodo in voronoi.puntos_voronoi:
+            pos_x, pos_y = self.mundo_a_pantalla(nodo[0], nodo[1])
+            pygame.draw.circle(
+                self.screen,
+                configuracion.COLOR_VORONOI_NODO,
+                (pos_x, pos_y),
+                2
+            )
 
     def dibujar_obstaculos(self):
         """Dibuja los obstáculos (paredes del laberinto)"""
@@ -80,7 +161,7 @@ class JuegoPygame:
                 tam * self.cell_size
             )
 
-            pygame.draw.rect(self.screen, COLOR_OBSTACULO, rect)
+            pygame.draw.rect(self.screen, configuracion.COLOR_OBSTACULO, rect)
             pygame.draw.rect(self.screen, (100, 100, 255), rect, 3)
 
     def dibujar_puntos(self):
@@ -92,7 +173,7 @@ class JuegoPygame:
 
                 pygame.draw.circle(
                     self.screen,
-                    COLOR_PUNTO,
+                    configuracion.COLOR_PUNTO,
                     (pos_x, pos_y),
                     self.cell_size // 4
                 )
@@ -108,7 +189,7 @@ class JuegoPygame:
         radio = int(self.cell_size * 0.4)
         pygame.draw.circle(
             self.screen,
-            COLOR_PACMAN,
+            configuracion.COLOR_PACMAN,
             (pos_x, pos_y),
             radio
         )
@@ -125,7 +206,7 @@ class JuegoPygame:
                 (pos_x + radio * math.cos(angulo - 0.5),
                  pos_y - radio * math.sin(angulo - 0.5))
             ]
-            pygame.draw.polygon(self.screen, COLOR_FONDO, puntos)
+            pygame.draw.polygon(self.screen, configuracion.COLOR_FONDO, puntos)
 
     def dibujar_fantasmas(self):
         """Dibuja los fantasmas"""
@@ -194,10 +275,31 @@ class JuegoPygame:
         )
         self.screen.blit(texto_restantes, (20, 100))
 
+        # Indicadores de visualización de grafos ← LEER DIRECTAMENTE DEL MÓDULO
+        y_offset = 140
+        if configuracion.MOSTRAR_VISIBILITY_GRAPH:
+            texto_vg = self.font_pequeña.render(
+                "Visibility Graph: ON",
+                True,
+                configuracion.COLOR_VG_NODO
+            )
+            self.screen.blit(texto_vg, (20, y_offset))
+            y_offset += 30
+
+        if configuracion.MOSTRAR_VORONOI:
+            texto_voronoi = self.font_pequeña.render(
+                "Voronoi Diagram: ON",
+                True,
+                configuracion.COLOR_VORONOI_NODO
+            )
+            self.screen.blit(texto_voronoi, (20, y_offset))
+
         if self.mostrar_ayuda and self.frame_count < 300:
             ayuda_textos = [
                 "Usa las FLECHAS para mover",
                 "ESPACIO para pausar",
+                "V para toggle Visibility Graph",
+                "W para toggle Voronoi",
                 "R para REINICIAR nivel",
                 "ESC para salir"
             ]
@@ -206,7 +308,7 @@ class JuegoPygame:
                 superficie = self.font_pequeña.render(texto, True, (100, 255, 100))
                 self.screen.blit(
                     superficie,
-                    (self.ancho - 320, 20 + i * 30)
+                    (self.ancho - 350, 20 + i * 30)
                 )
 
     def dibujar_pausa(self):
@@ -275,45 +377,6 @@ class JuegoPygame:
         rect_salir = texto_salir.get_rect(center=(self.ancho // 2, self.alto // 2 + 130))
         self.screen.blit(texto_salir, rect_salir)
 
-    def dibujar_voronoi(self):
-        """
-        Dibuja el diagrama de Voronoi (OPCIONAL - para debugging/presentación)
-        """
-        if not hasattr(self.entorno, 'voronoi_diagram') or not MOSTRAR_VORONOI:
-            return
-
-        voronoi = self.entorno.voronoi_diagram
-
-        # Dibujar nodos del diagrama
-        for nodo in voronoi.puntos_voronoi:
-            pos_x, pos_y = self.mundo_a_pantalla(nodo[0], nodo[1])
-            pygame.draw.circle(
-                self.screen,
-                COLOR_VORONOI_NODO,
-                (pos_x, pos_y),
-                2
-            )
-
-        # Dibujar conexiones
-        dibujadas = set()
-        for nodo, vecinos in voronoi.grafo.items():
-            for vecino in vecinos:
-                # Evitar dibujar la misma línea dos veces
-                if (vecino, nodo) in dibujadas:
-                    continue
-                dibujadas.add((nodo, vecino))
-
-                pos1 = self.mundo_a_pantalla(nodo[0], nodo[1])
-                pos2 = self.mundo_a_pantalla(vecino[0], vecino[1])
-
-                pygame.draw.line(
-                    self.screen,
-                    COLOR_VORONOI_LINEA,
-                    pos1,
-                    pos2,
-                    1
-                )
-
     def manejar_eventos(self):
         """Maneja los eventos del teclado"""
         for event in pygame.event.get():
@@ -326,6 +389,18 @@ class JuegoPygame:
 
                 if event.key == pygame.K_SPACE:
                     self.pausa = not self.pausa
+
+                # Toggle Visibility Graph ← MODIFICAR DIRECTAMENTE EL MÓDULO
+                if event.key == pygame.K_v:
+                    configuracion.MOSTRAR_VISIBILITY_GRAPH = not configuracion.MOSTRAR_VISIBILITY_GRAPH
+                    estado = "ON" if configuracion.MOSTRAR_VISIBILITY_GRAPH else "OFF"
+                    print(f"📐 Visibility Graph: {estado}")
+
+                # Toggle Voronoi Diagram ← MODIFICAR DIRECTAMENTE EL MÓDULO
+                if event.key == pygame.K_w:
+                    configuracion.MOSTRAR_VORONOI = not configuracion.MOSTRAR_VORONOI
+                    estado = "ON" if configuracion.MOSTRAR_VORONOI else "OFF"
+                    print(f"🔷 Voronoi Diagram: {estado}")
 
                 if event.key == pygame.K_r:
                     if self.entorno.juego_terminado:
@@ -369,6 +444,7 @@ class JuegoPygame:
                     fantasma.perseguir_pacman(
                         self.entorno.pacman.pos,
                         self.entorno.visibility_graph,
+                        self.entorno.voronoi_diagram,
                         self.entorno.obstaculos
                     )
 
@@ -398,9 +474,14 @@ class JuegoPygame:
                 pygame.display.set_caption(f"Pac-Man IA - Nivel {self.entorno.nivel_actual + 1}")
 
     def dibujar(self):
-        """Dibuja todos los elementos"""
-        self.screen.fill(COLOR_FONDO)
+        """Dibuja todos los elementos en el orden correcto"""
+        self.screen.fill(configuracion.COLOR_FONDO)
+
+        # Dibujar grafos de planificación PRIMERO (fondo)
+        self.dibujar_visibility_graph()
         self.dibujar_voronoi()
+
+        # Luego los elementos del juego
         self.dibujar_obstaculos()
         self.dibujar_puntos()
         self.dibujar_fantasmas()
@@ -452,6 +533,8 @@ class JuegoPygame:
         print("🎮 CONTROLES:")
         print("  ⬆️⬇️⬅️➡️  - Mover Pac-Man")
         print("  ESPACIO - Pausar")
+        print("  V - Toggle Visibility Graph")
+        print("  W - Toggle Voronoi Diagram")
         print("  R - Reiniciar nivel/juego")
         print("  ESC - Salir")
         print("="*60 + "\n")
